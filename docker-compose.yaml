@@ -1,0 +1,52 @@
+services:
+    # image project
+    eads:
+        container_name: eads
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        working_dir: /var/www/
+        ports:
+            - 8080:8000
+        volumes:
+            - ./:/var/www
+        networks:
+            - laravel
+
+    # db postgres
+    postgres:
+        image: postgres:15.3-alpine
+        container_name: postgres
+        restart: always
+        environment:
+            POSTGRES_DB: eads
+            POSTGRES_USER: dev
+            POSTGRES_PASSWORD: root
+        ports:
+            - 5432:5432
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        networks:
+            - laravel
+
+    # pgadmin
+    pgadmin:
+        image: dpage/pgadmin4
+        container_name: pgadmin
+        environment:
+            PGADMIN_DEFAULT_EMAIL: "eads@gmail.com"
+            PGADMIN_DEFAULT_PASSWORD: "root"
+        ports:
+            - "16543:80"
+        depends_on:
+          - postgres
+        networks:
+            - laravel
+
+networks:
+    laravel:
+        driver: bridge
+
+volumes:
+    pgdata:
